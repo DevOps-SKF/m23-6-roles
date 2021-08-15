@@ -1,0 +1,48 @@
+---
+# tasks file for linux_initial
+
+- name: Set timezone
+  timezone:
+    name: Europe/Moscow
+
+# - name: Ensure the locale exists
+#   locale_gen:
+#     name: en_GB.UTF-8
+#     state: present
+
+# - name: set time format to 24h
+#   command: localectl set-locale LC_TIME="en_GB.UTF-8"
+
+- name: Install required system packages
+  yum: name={{ item }} state=latest update_cache=yes
+  loop: [ 'mc']
+
+- name: Copy .config
+  copy:
+    src: "files/.config/"
+    dest: "/home/{{ ansible_user }}/.config/"
+  become: no
+
+- name: Upload ssh key
+  block:
+  - name: Ansible create .ssh directory and set permissions
+    file:
+      path: "/home/{{ ansible_user }}/.ssh"
+      state: directory
+      mode: 0700
+
+  - name: Copy file
+    copy:
+      src: "~/.ssh/id_rsa.pub"
+      dest: "/home/{{ ansible_user }}/.ssh/authorized_keys"
+      mode: 0640
+
+  - name: sudo without password
+    copy:
+      content: "anton ALL=(ALL) NOPASSWD: ALL"
+      dest: "/etc/sudoers.d/{{ ansible_user }}"
+    become: yes
+  become: no
+  when:
+    - '"ssh_key" in ansible_run_tags'
+  tags: ssh_key

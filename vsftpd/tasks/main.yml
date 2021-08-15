@@ -1,0 +1,13 @@
+---
+# tasks file for linux_initial
+
+
+- name: Install required system packages
+  yum: name=vsftpd state=latest update_cache=yes
+
+- name: Enable vsftpd service
+  service:
+    name: vsftpd.service
+    enabled: yes
+    state: started
+

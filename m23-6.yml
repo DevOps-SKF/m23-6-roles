@@ -1,0 +1,9 @@
+---
+- hosts: skfCentos
+  become: yes
+  become_method: sudo
+  gather_facts: no
+
+  roles:
+#  - centos_initial
+  - vsftpd
